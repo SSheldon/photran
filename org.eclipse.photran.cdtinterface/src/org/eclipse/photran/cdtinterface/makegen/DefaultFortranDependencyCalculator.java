@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
@@ -317,63 +318,13 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 	 */
 	private String getFileNameContainingModule(String moduleName, IResource[] resources, String buildDirName)
 	{
-		ArrayList possibleMatchingFiles = new ArrayList();
-		if(resources == null || resources.length < 1 || 
-		   moduleName == null || moduleName == "") //$NON-NLS-1$
-		{
+		List<IFile> files = PhotranVPG.getInstance().findFilesThatExportModule(moduleName);
+		if (files.size() == 1) {
+			IFile file = files.get(0);
+			return file.getProjectRelativePath().toString().replaceFirst("\\..+", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		} else {
 			return null;
 		}
-		
-		for(int i = 0; i < resources.length; i++)
-		{
-			if(resources[i] instanceof IFile)
-			{
-				IFile f = (IFile)resources[i];
-				
-				//Gets rid of the file extension
-				String fileName = f.getName().replaceFirst("\\..+", ""); //$NON-NLS-1$ //$NON-NLS-2$
-				
-				//If a file name matches a module name exactly -- return the relative path to that file
-				if(fileName == moduleName)
-					return f.getProjectRelativePath().toString().replaceFirst("\\..+", ""); //$NON-NLS-1$ //$NON-NLS-2$
-				
-				//Otherwise, check if the two names have different cases
-				else if(fileName.equalsIgnoreCase(moduleName))
-				{
-					//And if they do, keep it
-					possibleMatchingFiles.add(f.getProjectRelativePath().toString().replaceFirst("\\..+", "")); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-			//If its a folder, recurse, but don't look in other build folders (Bug 326333)
-			else if(resources[i] instanceof IContainer && !resources[i].isDerived())
-			{
-				IContainer folder = (IContainer)resources[i];
-				IResource[] subResource = null;
-				
-				//Skip build folder, because it contains files with the same
-				// names as the one we are looking for (created .o files)
-				if(folder.getName().equalsIgnoreCase(buildDirName))
-					continue;
-					
-				try 
-				{
-					subResource = folder.members();
-				} 
-				catch (CoreException e) 
-				{
-					throw new Error("Could not open a container to explore its files"); //$NON-NLS-1$
-				}
-				
-				String name = getFileNameContainingModule(moduleName, subResource, buildDirName);
-				if(name != null)
-					return name;
-			}			
-		}
-		if(possibleMatchingFiles.size() == 1)
-			return (String) possibleMatchingFiles.get(0);
-		
-		return null;
-			
 	}
 	
 	private void removeDir(File f)
