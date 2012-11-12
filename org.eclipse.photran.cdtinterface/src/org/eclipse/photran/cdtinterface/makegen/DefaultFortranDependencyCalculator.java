@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.photran.internal.cdtinterface.core.FortranLanguage;
+import org.eclipse.photran.internal.core.vpg.PhotranVPG;
 
 /**
  *  This class implements the Dependency Manager and Output Name Provider interfaces
