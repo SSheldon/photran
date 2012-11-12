@@ -245,7 +245,9 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 								//  to generate .mod files in the directory from which the compiler is run.  For MBS, this
 								//  is the top-level build directory.  
 								//  TODO: Support the /module:path option and use that in determining the path of the module file 
-								IPath modName = getModulePath(topBuildDir, modules[im], res, project);
+								IFile file = (IFile)resourcesToSearch[ir];
+								String fileNameContainingModule = file.getProjectRelativePath().toString().replaceFirst("\\..+", ""); //$NON-NLS-1$ //$NON-NLS-2$;
+								IPath modName = Path.fromOSString("./"+topBuildDir + Path.SEPARATOR + fileNameContainingModule + "." + MODULE_EXTENSION); //$NON-NLS-1$ //$NON-NLS-2$
 								modRes.add(project.getFile(modName));
 								foundDependency = true;
 								break;
@@ -269,78 +271,6 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 			}
 		}		
 		return (IResource[]) modRes.toArray(new IResource[modRes.size()]);
-	}
-	
-	/*
-	 * Finds the relative path to the file whose name matches of the given module. If no such file
-	 * is found, the "Debug" folder is erased and an error is thrown.
-	 * 
-	 * @topBuildDir - name of directory (possibly relative path) in which make/object files will be created
-	 * @moduleName  - name of the module that we are comparing files against
-	 * @project		- project we are currently compiling. Used to remove the Debug directory in case of failure
-	 */
-	private IPath getModulePath(String topBuildDir, String moduleName, IResource[] resources, IProject project)
-	{
-		String fileNameContainingModule;
-		fileNameContainingModule = getFileNameContainingModule(moduleName, resources, topBuildDir);
-		
-		//If we can't find any files with that module, remove Debug folder
-		if(fileNameContainingModule == null || fileNameContainingModule == "") //$NON-NLS-1$
-		{
-			removeDir(new File(project.getLocation().toString() + Path.SEPARATOR + topBuildDir));
-			try 
-			{
-				project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-			} 
-			catch (CoreException e) 
-			{
-				throw new Error("Could not update the project"); //$NON-NLS-1$
-			}
-			throw new Error("Could not find a file to match the module name: "+ moduleName); //$NON-NLS-1$
-		}
-		
-		IPath p = Path.fromOSString("./"+topBuildDir + Path.SEPARATOR + fileNameContainingModule + "." + MODULE_EXTENSION); //$NON-NLS-1$ //$NON-NLS-2$
-		return p;
-	}
-	
-	/*
-	 * This method operates under that assumption that 
-	 * 1. There will be no 2 files that are named the same, even if they are in separate folder
-	 * 2. There is only 1 module per file
-	 * 3. There are no files that differ in their names only by upper or lower case letters (i.e. file1.f90 and fILe1.f90)
-	 * 
-	 * This method finds the relative path to the filename that matches the name of the given module. It 
-	 * searches the list of given @resources to compare the names of contained files. It returns a string which
-	 * is the relative path to the file supposedly containing the given module, with that file's extension chopped off.
-	 * 
-	 * @moduleName - name of the module that we are comparing files against
-	 * @resources  - list of resources that we look through (could be files and folders)
-	 */
-	private String getFileNameContainingModule(String moduleName, IResource[] resources, String buildDirName)
-	{
-		List<IFile> files = PhotranVPG.getInstance().findFilesThatExportModule(moduleName);
-		if (files.size() == 1) {
-			IFile file = files.get(0);
-			return file.getProjectRelativePath().toString().replaceFirst("\\..+", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		} else {
-			return null;
-		}
-	}
-	
-	private void removeDir(File f)
-	{	
-		if(f != null && f.exists())
-		{
-			File[] files = f.listFiles();
-			for(int i = 0; i < files.length; i++)
-			{
-				if(files[i].isDirectory())
-					removeDir(files[i]);
-				else
-					files[i].delete();
-			}
-		}
-		f.delete();
 	}
 	
 	
