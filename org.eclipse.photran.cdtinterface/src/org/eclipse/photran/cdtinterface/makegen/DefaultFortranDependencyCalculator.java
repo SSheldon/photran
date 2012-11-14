@@ -216,7 +216,7 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 	 * @see org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderDependencyCalculator#findDependencies(org.eclipse.core.resources.IResource)
 	 */
 	public IResource[] findDependencies(IResource resource, IProject project) {
-		ArrayList dependencies = new ArrayList();
+		ArrayList<IResource> dependencies = new ArrayList<IResource>();
 		Collection fortranContentTypes = new FortranLanguage().getRegisteredContentTypeIds();
 
 		//  TODO:  This method should be passed the ITool and the relative path of the top build directory
@@ -257,7 +257,7 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 			return new IResource[0];
 		}
 		
-		return (IResource[]) dependencies.toArray(new IResource[dependencies.size()]);
+		return dependencies.toArray(new IResource[dependencies.size()]);
 	}
 
 	/* (non-Javadoc)
