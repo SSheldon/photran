@@ -40,7 +40,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.photran.core.IFortranAST;
 import org.eclipse.photran.internal.cdtinterface.core.FortranLanguage;
+import org.eclipse.photran.internal.core.analysis.binding.Definition;
+import org.eclipse.photran.internal.core.lexer.Token;
+import org.eclipse.photran.internal.core.parser.ASTUseStmtNode;
 import org.eclipse.photran.internal.core.vpg.PhotranVPG;
 
 /**
@@ -60,76 +64,18 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 	/*
 	 * Return a list of the names of all modules used by a file
 	 */
-	private String[] findUsedModuleNames(File file) {
-		ArrayList names = new ArrayList();
-		InputStream in = null;
-		Reader r = null;
-		try {
-		/*
-			InputStream in = new BufferedInputStream(new FileInputStream(file));
-			ILexer lexer = FortranProcessor.createLexerFor(in, file.getName());
-			for (Token thisToken = lexer.yylex(), lastToken = null;
-			     thisToken.getTerminal() != Terminal.END_OF_INPUT;
-			     lastToken = thisToken, thisToken = lexer.yylex())
+	private List<String> findUsedModuleNames(IFile file) {
+		List<String> modules = new ArrayList<String>();
+		IFortranAST ast = PhotranVPG.getInstance().acquireTransientAST(file);
+		if (ast != null)
+		{
+			for (ASTUseStmtNode use : ast.getRoot().findAll(ASTUseStmtNode.class))
 			{
-				if (lastToken != null
-						      && lastToken.getTerminal() == Terminal.T_USE
-					          && thisToken.getTerminal() == Terminal.T_IDENT)
-				{
-					names.add(thisToken.getText());
-				}
-			}
-		*/
-			in = new BufferedInputStream(new FileInputStream(file));
-			r = new BufferedReader(new InputStreamReader(in));
-			StreamTokenizer st = new StreamTokenizer(r);
-			st.commentChar('!');
-			st.eolIsSignificant(false);
-			st.slashSlashComments(false);
-			st.slashStarComments(false);
-			st.wordChars('_', '_');
-			
-			int token;
-			while ((token = st.nextToken()) != StreamTokenizer.TT_EOF) {
-				if (st.ttype == StreamTokenizer.TT_WORD) {
-					if (st.sval.equalsIgnoreCase("use")) { //$NON-NLS-1$
-						token = st.nextToken();
-						if (st.ttype == StreamTokenizer.TT_WORD) {
-							names.add(st.sval);
-						} else {
-							st.pushBack();
-						}
-					}
-					/**
-					 * This should be moved to separate include file list
-					 */
-					/*
-					else if (st.sval.equalsIgnoreCase("include")) {
-						token = st.nextToken();
-						if (st.ttype == '\'' || st.ttype == '"') {
-							names.add(st.sval);
-						} else {
-							st.pushBack();
-						}
-					}
-					*/
-				}
+				String moduleName = PhotranVPG.canonicalizeIdentifier(use.getName().getText());
+				modules.add(moduleName);
 			}
 		}
-		catch (Exception e) {
-			return new String[0];
-		}
-		finally {
-			try {
-				if (r != null)
-					r.close();
-				else if (in != null)
-					in.close();
-			}
-			catch (IOException e) {
-			}
-		}
-		return (String[]) names.toArray(new String[names.size()]);
+		return modules;
 	}
 	
 	/*
@@ -234,7 +180,7 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 			dependencies.add(resource);
 	
 			//  Get the names of the modules USE'd by the source file
-			String[] usedNames = findUsedModuleNames(file);
+			List<String> usedNames = findUsedModuleNames((IFile)resource);
 
 			//  Search the project files for a Fortran source that creates the module.
 			//  Compiling this source file is dependent upon first compiling the found source file.
