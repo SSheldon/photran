@@ -26,7 +26,6 @@ import java.util.List;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
-import org.eclipse.cdt.managedbuilder.core.IManagedOutputNameProvider;
 import org.eclipse.cdt.managedbuilder.core.ITool;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedDependencyGenerator;
@@ -56,8 +55,7 @@ import org.eclipse.photran.internal.core.vpg.PhotranVPG;
  *  @since 8.0
  */
 @SuppressWarnings({ "deprecation", "rawtypes", "unchecked", "unused" })
-public class DefaultFortranDependencyCalculator implements IManagedDependencyGenerator,
-														   IManagedOutputNameProvider
+public class DefaultFortranDependencyCalculator implements IManagedDependencyGenerator
 {
 	public static final String MODULE_EXTENSION = "o";	//$NON-NLS-1$
 	
@@ -76,71 +74,6 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 			}
 		}
 		return modules;
-	}
-	
-	/*
-	 * Return a list of the names of all modules defined in a file
-	 */
-	private String[] findModuleNames(File file) {
-		ArrayList names = new ArrayList();
-		InputStream in = null;
-		Reader r = null;
-		try {
-			/*
-			InputStream in = new BufferedInputStream(new FileInputStream(file));
-			ILexer lexer = FortranProcessor.createLexerFor(in, file.getName());
-			for (Token thisToken = lexer.yylex(), lastToken = null, tokenBeforeLast = null;
-			     thisToken.getTerminal() != Terminal.END_OF_INPUT;
-			     tokenBeforeLast = lastToken, lastToken = thisToken, thisToken = lexer.yylex())
-			{
-				if (lastToken != null
-				    && lastToken.getTerminal() == Terminal.T_MODULE
-				    && thisToken.getTerminal() == Terminal.T_IDENT)
-				{
-					if (tokenBeforeLast != null && tokenBeforeLast.getTerminal() == Terminal.T_END) {
-						continue;
-					}
-					names.add(thisToken.getText());
-				}
-			}
-			*/
-			in = new BufferedInputStream(new FileInputStream(file));
-			r = new BufferedReader(new InputStreamReader(in));
-			StreamTokenizer st = new StreamTokenizer(r);
-			st.commentChar('!');
-			st.eolIsSignificant(false);
-			st.slashSlashComments(false);
-			st.slashStarComments(false);
-			st.wordChars('_', '_');
-			
-			int token;
-			while ((token = st.nextToken()) != StreamTokenizer.TT_EOF) {
-				if (st.ttype == StreamTokenizer.TT_WORD) {
-					if (st.sval.equalsIgnoreCase("module")) { //$NON-NLS-1$
-						token = st.nextToken();
-						if (st.ttype == StreamTokenizer.TT_WORD) {
-							names.add(st.sval);
-						} else {
-							st.pushBack();
-						}
-					}
-				}
-			}
-		}
-		catch (Exception e) {
-			return new String[0];
-		}
-		finally {
-			try {
-				if (r != null)
-					r.close();
-				else if (in != null)
-					in.close();
-			}
-			catch (IOException e) {
-			}
-		}
-		return (String[]) names.toArray(new String[names.size()]);
 	}
 
 	/*
@@ -222,35 +155,5 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 		 * so implement findDependencies() rather than getDependencyCommand().
 		 * */
 		return null;
-	}
-
-	/*
-	 *  (non-Javadoc)
-	 * @see org.eclipse.cdt.managedbuilder.core.IManagedOutputNameProvider#getOutputNames(org.eclipse.cdt.managedbuilder.core.ITool, org.eclipse.core.runtime.IPath[])
-	 */
-	public IPath[] getOutputNames(ITool tool, IPath[] primaryInputNames) {
-		//  TODO:  This method should be passed the relative path of the top build directory?
-		ArrayList outs = new ArrayList();
-		if (primaryInputNames.length > 0) {
-			// Get the names of modules created by this source file
-			String[] modules = findModuleNames(primaryInputNames[0].toFile());
-			// Add any generated modules
-			if (modules != null) {
-				for (int i = 0; i < modules.length; i++) {
-					//  Return the path to the module file that will be created by the build.  By default, ifort appears
-					//  to generate .mod files in the directory from which the compiler is run.  For MBS, this
-					//  is the top-level build directory.  
-					//  TODO: Support the /module:path option and use that in determining the path of the module file
-					//  TODO: The nameProvider documentation should note that the returned path is relative to the top-level 
-					//        build directory.  HOWEVER, if only a file name is returned, MBS will automatically add on the
-					//        directory path relative to the top-level build directory.  The relative path comes from the source
-					//        file location.  In order to specify that this output file is always in the top-level build 
-					//        directory, regardless of the source file directory structure, return "./path".
-					IPath modName = Path.fromOSString("." + Path.SEPARATOR + modules[i] + "." + MODULE_EXTENSION); //$NON-NLS-1$ //$NON-NLS-2$
-					outs.add(modName);				
-				}
-			}
-		}
-		return (IPath[]) outs.toArray(new IPath[outs.size()]);
 	}
 }
