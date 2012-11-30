@@ -10,15 +10,7 @@
  *******************************************************************************/
 package org.eclipse.photran.cdtinterface.makegen;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -26,23 +18,16 @@ import java.util.List;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
-import org.eclipse.cdt.managedbuilder.core.ITool;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedDependencyGenerator;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.photran.core.IFortranAST;
 import org.eclipse.photran.internal.cdtinterface.core.FortranLanguage;
-import org.eclipse.photran.internal.core.analysis.binding.Definition;
-import org.eclipse.photran.internal.core.lexer.Token;
 import org.eclipse.photran.internal.core.parser.ASTUseStmtNode;
 import org.eclipse.photran.internal.core.vpg.PhotranVPG;
 
@@ -54,7 +39,7 @@ import org.eclipse.photran.internal.core.vpg.PhotranVPG;
  *  
  *  @since 8.0
  */
-@SuppressWarnings({ "deprecation", "rawtypes", "unchecked", "unused" })
+@SuppressWarnings({ "deprecation", "rawtypes", "unchecked" })
 public class DefaultFortranDependencyCalculator implements IManagedDependencyGenerator
 {
 	public static final String MODULE_EXTENSION = "o";	//$NON-NLS-1$
