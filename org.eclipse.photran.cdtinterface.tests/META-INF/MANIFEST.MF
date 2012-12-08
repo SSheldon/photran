@@ -6,3 +6,5 @@ Bundle-Version: 8.0.0.qualifier
 Bundle-Vendor: %providerName
 Fragment-Host: org.eclipse.photran.cdtinterface
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.junit,
+ org.eclipse.photran.core.vpg.tests
