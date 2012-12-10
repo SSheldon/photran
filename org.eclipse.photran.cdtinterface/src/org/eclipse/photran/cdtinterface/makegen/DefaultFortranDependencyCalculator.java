@@ -108,16 +108,21 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 			//  Compiling this source file is dependent upon first compiling the found source file.
 			for (String usedName : usedNames) {
 				List<IFile> exportingFiles = PhotranVPG.getInstance().findFilesThatExportModule(usedName);
-				if (exportingFiles.size() == 1) {
-					IFile exportingFile = exportingFiles.get(0);
-					//  Get the path to the module file that will be created by the build.  By default, ifort appears
-					//  to generate .mod files in the directory from which the compiler is run.  For MBS, this
-					//  is the top-level build directory.
-					//  TODO: Support the /module:path option and use that in determining the path of the module file
-					String fileNameContainingModule = exportingFile.getProjectRelativePath().toString().replaceFirst("\\..+", ""); //$NON-NLS-1$ //$NON-NLS-2$;
-					IPath modName = Path.fromOSString("./" + configName + Path.SEPARATOR + fileNameContainingModule + "." + MODULE_EXTENSION); //$NON-NLS-1$ //$NON-NLS-2$
-					dependencies.add(project.getFile(modName));
-				}
+				if (exportingFiles.size() != 1) continue;
+
+				IFile exportingFile = exportingFiles.get(0);
+				if (resource.equals(exportingFile)) continue;
+
+				//  Get the path to the module file that will be created by the build.  By default, ifort appears
+				//  to generate .mod files in the directory from which the compiler is run.  For MBS, this
+				//  is the top-level build directory.
+				//  TODO: Support the /module:path option and use that in determining the path of the module file
+				String fileNameContainingModule = exportingFile.getProjectRelativePath().toString().replaceFirst("\\..+", ""); //$NON-NLS-1$ //$NON-NLS-2$;
+				IPath modName = Path.fromOSString("./" + configName + Path.SEPARATOR + fileNameContainingModule + "." + MODULE_EXTENSION); //$NON-NLS-1$ //$NON-NLS-2$
+				IFile modFile = project.getFile(modName);
+				if (dependencies.contains(modFile)) continue;
+
+				dependencies.add(modFile);
 			}
 		}
 		catch (Exception e)
