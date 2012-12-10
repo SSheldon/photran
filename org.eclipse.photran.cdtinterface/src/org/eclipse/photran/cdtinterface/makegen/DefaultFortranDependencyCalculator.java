@@ -80,13 +80,17 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 	 * @see org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderDependencyCalculator#findDependencies(org.eclipse.core.resources.IResource)
 	 */
 	public IResource[] findDependencies(IResource resource, IProject project) {
-		ArrayList<IResource> dependencies = new ArrayList<IResource>();
-		Collection fortranContentTypes = new FortranLanguage().getRegisteredContentTypeIds();
-
 		//  TODO:  This method should be passed the ITool and the relative path of the top build directory
 		//         For now we'll figure this out from the project.
 		IManagedBuildInfo mngInfo = ManagedBuildManager.getBuildInfo(project);
 		IConfiguration config = mngInfo.getDefaultConfiguration();
+
+		return findDependencies(resource, project, config.getName());
+	}
+
+	public IResource[] findDependencies(IResource resource, IProject project, String configName) {
+		ArrayList<IResource> dependencies = new ArrayList<IResource>();
+		Collection fortranContentTypes = new FortranLanguage().getRegisteredContentTypeIds();
 
 		File file = resource.getLocation().toFile();
 		try {
@@ -111,7 +115,7 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 					//  is the top-level build directory.
 					//  TODO: Support the /module:path option and use that in determining the path of the module file
 					String fileNameContainingModule = exportingFile.getProjectRelativePath().toString().replaceFirst("\\..+", ""); //$NON-NLS-1$ //$NON-NLS-2$;
-					IPath modName = Path.fromOSString("./" + config.getName() + Path.SEPARATOR + fileNameContainingModule + "." + MODULE_EXTENSION); //$NON-NLS-1$ //$NON-NLS-2$
+					IPath modName = Path.fromOSString("./" + configName + Path.SEPARATOR + fileNameContainingModule + "." + MODULE_EXTENSION); //$NON-NLS-1$ //$NON-NLS-2$
 					dependencies.add(project.getFile(modName));
 				}
 			}
