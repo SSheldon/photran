@@ -89,14 +89,14 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 	}
 
 	public IResource[] findDependencies(IResource resource, IProject project, String configName) {
-		ArrayList<IResource> dependencies = new ArrayList<IResource>();
-		Collection fortranContentTypes = new FortranLanguage().getRegisteredContentTypeIds();
-
 		File file = resource.getLocation().toFile();
+		Collection fortranContentTypes = new FortranLanguage().getRegisteredContentTypeIds();
+		if (!isFortranFile(project, file, fortranContentTypes)) {
+			return new IResource[0];
+		}
+
+		ArrayList<IResource> dependencies = new ArrayList<IResource>();
 		try {
-			if (!isFortranFile(project, file, fortranContentTypes)) {
-				return new IResource[0];
-			}
 			
 			// add dependency on self
 			dependencies.add(resource);
