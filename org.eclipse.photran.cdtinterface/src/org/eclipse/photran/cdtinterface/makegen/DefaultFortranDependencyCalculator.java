@@ -96,40 +96,34 @@ public class DefaultFortranDependencyCalculator implements IManagedDependencyGen
 		}
 
 		ArrayList<IResource> dependencies = new ArrayList<IResource>();
-		try {
-			
-			// add dependency on self
-			dependencies.add(resource);
-	
-			//  Get the names of the modules USE'd by the source file
-			List<String> usedNames = findUsedModuleNames((IFile)resource);
 
-			//  Search the project files for a Fortran source that creates the module.
-			//  Compiling this source file is dependent upon first compiling the found source file.
-			for (String usedName : usedNames) {
-				List<IFile> exportingFiles = PhotranVPG.getInstance().findFilesThatExportModule(usedName);
-				if (exportingFiles.size() != 1) continue;
+		// add dependency on self
+		dependencies.add(resource);
 
-				IFile exportingFile = exportingFiles.get(0);
-				if (resource.equals(exportingFile)) continue;
+		//  Get the names of the modules USE'd by the source file
+		List<String> usedNames = findUsedModuleNames((IFile)resource);
 
-				//  Get the path to the module file that will be created by the build.  By default, ifort appears
-				//  to generate .mod files in the directory from which the compiler is run.  For MBS, this
-				//  is the top-level build directory.
-				//  TODO: Support the /module:path option and use that in determining the path of the module file
-				String fileNameContainingModule = exportingFile.getProjectRelativePath().toString().replaceFirst("\\..+", ""); //$NON-NLS-1$ //$NON-NLS-2$;
-				IPath modName = Path.fromOSString("./" + configName + Path.SEPARATOR + fileNameContainingModule + "." + MODULE_EXTENSION); //$NON-NLS-1$ //$NON-NLS-2$
-				IFile modFile = project.getFile(modName);
-				if (dependencies.contains(modFile)) continue;
+		//  Search the project files for a Fortran source that creates the module.
+		//  Compiling this source file is dependent upon first compiling the found source file.
+		for (String usedName : usedNames) {
+			List<IFile> exportingFiles = PhotranVPG.getInstance().findFilesThatExportModule(usedName);
+			if (exportingFiles.size() != 1) continue;
 
-				dependencies.add(modFile);
-			}
+			IFile exportingFile = exportingFiles.get(0);
+			if (resource.equals(exportingFile)) continue;
+
+			//  Get the path to the module file that will be created by the build.  By default, ifort appears
+			//  to generate .mod files in the directory from which the compiler is run.  For MBS, this
+			//  is the top-level build directory.
+			//  TODO: Support the /module:path option and use that in determining the path of the module file
+			String fileNameContainingModule = exportingFile.getProjectRelativePath().toString().replaceFirst("\\..+", ""); //$NON-NLS-1$ //$NON-NLS-2$;
+			IPath modName = Path.fromOSString("./" + configName + Path.SEPARATOR + fileNameContainingModule + "." + MODULE_EXTENSION); //$NON-NLS-1$ //$NON-NLS-2$
+			IFile modFile = project.getFile(modName);
+			if (dependencies.contains(modFile)) continue;
+
+			dependencies.add(modFile);
 		}
-		catch (Exception e)
-		{
-			return new IResource[0];
-		}
-		
+
 		return dependencies.toArray(new IResource[dependencies.size()]);
 	}
 
