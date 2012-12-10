@@ -23,11 +23,13 @@ public class ModuleFileNameTests extends PhotranWorkspaceTestCase {
 	}
 
 	public void testFindDependencies() {
-		IResource[] moduleDependencies = dependencyCalc.findDependencies(program, project);
-		assertEquals(0, moduleDependencies.length);
+		IResource[] moduleDependencies = dependencyCalc.findDependencies(module, project, "Debug");
+		assertEquals(1, moduleDependencies.length);
+		assertEquals(module, moduleDependencies[0]);
 
-		IResource[] programDependencies = dependencyCalc.findDependencies(program, project);
-		assertEquals(1, programDependencies.length);
-		assertEquals(module, programDependencies[0]);
+		IResource[] programDependencies = dependencyCalc.findDependencies(program, project, "Debug");
+		assertEquals(2, programDependencies.length);
+		assertEquals(program, programDependencies[0]);
+		assertEquals("shape.o", programDependencies[1].getName());
 	}
 }
