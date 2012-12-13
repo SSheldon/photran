@@ -22,7 +22,6 @@ public class ModuleAcrossMultipleFilesTest extends PhotranWorkspaceTestCase {
 		program = importFile(CDTInterfacePlugin.getDefault(), DIR, "main.f90");
 		module1 = importFile(CDTInterfacePlugin.getDefault(), DIR, "hello.f90");
 		module2 = importFile(CDTInterfacePlugin.getDefault(), DIR, "sub.f90");
-
 	}
 
 	public void testModulesAcrossMultipleFiles() {
@@ -36,7 +35,13 @@ public class ModuleAcrossMultipleFilesTest extends PhotranWorkspaceTestCase {
 
 		IResource [] programDependencies = dependencyCalc.findDependencies(program, project, "Debug");
 		assertEquals(3, programDependencies.length);
-		assertEquals("hello.o", programDependencies[1].getName());
-		assertEquals("sub.o", programDependencies[2].getName());
+		// Order is unimportant, but the last two dependencies must be hello.o and sub.o
+		if (programDependencies[1].getName().equals("hello.o")) {
+			assertEquals("sub.o", programDependencies[2].getName());
+		} else if (programDependencies[1].getName().equals("sub.o")) {
+			assertEquals("hello.o", programDependencies[2].getName());
+		} else {
+			fail();
+		}
 	}
 }
