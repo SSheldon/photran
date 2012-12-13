@@ -573,16 +573,12 @@
           </outputType>
 	  </tool>
 
-      <!--
-        -
-        - GNU Fortran on Linux/*nix Project Type
-        -
-        -->
       <projectType
             isAbstract="false"
             isTest="false"
             name="%TargetName.gnu.fortran.exe"
             id="photran.managedbuild.target.gnu.fortran.exe">
+         <!-- GNU Fortran on Linux/*nix Configuration -->
          <configuration
                name="%ConfigName.Dbg"
                id="photran.managedbuild.config.gnu.fortran.exe.debug"
@@ -705,18 +701,8 @@
     	          </tool>
                </toolChain>
          </configuration>
-      </projectType>
 
-      <!--
-        -
-        - GNU Fortran on Mac OS X Project Type
-        -
-        -->
-      <projectType
-            name="%TargetName.gnu.fortran.macosx.exe"
-            id="photran.managedbuild.target.gnu.fortran.macosx.exe"
-            isTest="false"
-            isAbstract="false">
+         <!-- GNU Fortran on Mac OS X Configuration -->
          <configuration
                name="%ConfigName.Dbg"
                cleanCommand="rm -rf"
@@ -725,7 +711,7 @@
                <toolChain
                      archList="all"
                      osList="macosx"
-                     name="%ToolChainName.Dbg"
+                     name="%ToolChainName.macosx.Dbg"
                      targetTool="photran.managedbuild.tool.macosx.fortran.linker.macosx.exe.debug"
                      scannerConfigDiscoveryProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile"
                      id="photran.managedbuild.toolchain.gnu.fortran.macosx.exe.debug">
@@ -786,7 +772,7 @@
                <toolChain
                      archList="all"
                      osList="macosx"
-                     name="%ToolChainName.Rel"
+                     name="%ToolChainName.macosx.Rel"
                      targetTool="photran.managedbuild.tool.macosx.fortran.linker.macosx.exe.release"
                      scannerConfigDiscoveryProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile"
                      id="photran.managedbuild.toolchain.gnu.fortran.macosx.exe.release">
@@ -839,18 +825,8 @@
 				  </tool>
                </toolChain>
          </configuration>
-	  </projectType>
 
-      <!--
-        -
-        - GNU Fortran on Windows Project Type
-        -
-        -->
-      <projectType
-            name="%TargetName.gnu.fortran.win32.exe"
-            id="photran.managedbuild.target.gnu.fortran.win32.exe"
-            isTest="false"
-            isAbstract="false">
+         <!-- GNU Fortran on Windows Configuration -->
          <configuration
                name="%ConfigName.Dbg"
                cleanCommand="rm -rf"
@@ -859,7 +835,7 @@
                <toolChain
                      archList="all"
                      osList="win32"
-                     name="%ToolChainName.Dbg"
+                     name="%ToolChainName.win32.Dbg"
                      targetTool="photran.managedbuild.tool.gnu.fortran.linker.exe.debug"
                      scannerConfigDiscoveryProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile"
                      id="photran.managedbuild.toolchain.gnu.fortran.win32.exe.debug">
@@ -920,7 +896,7 @@
                <toolChain
                      archList="all"
                      osList="win32"
-                     name="%ToolChainName.Rel"
+                     name="%ToolChainName.win32.Rel"
                      targetTool="photran.managedbuild.tool.gnu.fortran.linker.exe.release"
                      scannerConfigDiscoveryProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile"
                      id="photran.managedbuild.toolchain.gnu.fortran.win32.exe.release">
